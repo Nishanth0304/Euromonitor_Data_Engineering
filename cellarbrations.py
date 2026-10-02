@@ -8,7 +8,7 @@ from curl_cffi import requests
 
 BASE_URL = "https://www.cellarbrations.com.au"
 CATEGORY_URL = (
-    f"{BASE_URL}/sm/pickup/rsid/3331/"
+    f"{BASE_URL}/sm/delivery/rsid/144981/"
     "categories/spirits/whisky-id-Whisky_Food"
 )
 PRODUCT_API = "https://storefrontgateway.cellarbrations.com.au"
@@ -56,7 +56,7 @@ def slugify(value: str) -> str:
 
 def build_product_url(product_name: str, product_id: str) -> str:
    return (
-    f"{BASE_URL}/sm/pickup/rsid/3331/product/"
+    f"{BASE_URL}/sm/delivery/rsid/144981/product/"
     f"{slugify(product_name)}-id-{product_id}"
    )
 
@@ -100,7 +100,7 @@ def scrape() -> list[dict]:
                continue
            sku = product.get("sku", str(product_id))
            product_response = session.get(
-               f"{PRODUCT_API}/api/stores/3331/products/{sku}",
+               f"{PRODUCT_API}/api/stores/144981/products/{sku}",
                timeout=TIMEOUT,
            )
            product_response.raise_for_status()
