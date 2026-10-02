@@ -1,0 +1,103 @@
+Euromonitor Data Engineer Assignment
+=========================================
+
+Overview
+--------
+This repository implements both exercises in Python.
+
+Exercise 1: Glossier
+- Collection: https://www.glossier.com/en-in/collections/all
+- US market: https://www.glossier.com/en-us/collections/all
+- The scraper uses the public Shopify collection JSON endpoint to enumerate
+  products and the corresponding public product JSON endpoint for product
+  detail data.
+- No browser automation is required for this approach.
+- The base output contains one row per catalog product.
+- The optional --variants flag creates one row per Shopify variant and uses
+  the variant ID as product_id.
+- Images are stored in the CSV as a JSON-encoded array of strings.
+- scraped_at is one UTC ISO-8601 timestamp for the run.
+
+Exercise 2: Cellarbrations
+- Category:
+  https://www.cellarbrations.com.au/sm/pickup/rsid/3331/categories/spirits/whisky-id-Whisky_Food
+- The category page is accessed using direct HTTP requests with curl_cffi.
+- Chrome impersonation is used to make the HTTP client behave more like a
+  normal browser request.
+- The category response is used to discover the available whisky products.
+- Product details are retrieved from the Cellarbrations storefront API.
+- Product IDs are taken from the product/SKU information returned by the
+  storefront data.
+- Product descriptions are extracted from the structured product data.
+- measuring_unit and units are extracted from the product size information.
+- Images are stored as a JSON-encoded value in the CSV.
+
+Browser-rendering decision for Cellarbrations
+---------------------------------------------
+Evidence observed during development:
+1. The whisky category page can be accessed successfully through a direct
+   HTTP request.
+2. The category response contains the information required to discover the
+   available products.
+3. The Cellarbrations storefront API provides the required product-level
+   information, including product name, product ID, price, description,
+   images and product size.
+4. Since the required information can be obtained through HTTP requests,
+   browser automation is not required for the current implementation.
+
+Tradeoff:
+- Direct HTTP requests are lighter and simpler for a finite catalogue scrape.
+- curl_cffi with Chrome impersonation provides browser-like HTTP behaviour
+  without the overhead of launching a full browser.
+- Browser rendering would require additional startup time, memory and
+  browser resources.
+- I would switch to browser rendering if the required product information
+  stopped being available through the initial HTTP responses or storefront
+  API, or if JavaScript execution became necessary to obtain required data.
+
+Reliability decisions
+---------------------
+- HTTP requests have explicit timeouts.
+- HTTP errors are handled instead of silently producing incomplete results.
+- The scraper follows the live catalogue rather than hard-coding a fixed
+  number of products.
+- Product details are retrieved from the storefront data for each discovered
+  product.
+- measuring_unit and units are obtained from structured product size data.
+- A small delay can be used between product requests to avoid unnecessarily
+  aggressive traffic.
+- scraped_at timestamps are recorded in UTC.
+
+Assumptions
+-----------
+- The public storefront and accessible storefront API are the intended
+  sources for the Cellarbrations exercise.
+- The assignment's "unique product id" maps to the product/SKU identifier
+  returned by the Cellarbrations storefront data.
+- The Cellarbrations scrape uses the pickup store represented by rsid/3331.
+- measuring_unit represents the unit abbreviation, such as ml.
+- units represents the numeric product size, such as 700.
+- CSV fields containing multiple image values are represented using JSON
+  because CSV does not have a native array type.
+- Timestamps are recorded in UTC for reproducibility.
+
+AI usage disclosure
+-------------------
+AI (ChatGPT) was used during development to:
+- research the public site structure and storefront endpoints;
+- propose Python scraping approaches;
+- assist with HTTP client and parsing logic;
+- identify edge cases such as variants, locale handling and unit parsing;
+- draft initial Python boilerplate and documentation;
+- assist with troubleshooting during development.
+
+The submitted code was manually reviewed and tested by the candidate.
+Manual review was used to validate selectors, site-specific assumptions,
+error handling and output fields.
+
+The candidate should be able to explain the scraping flow, data extraction,
+error handling, output structure and the reasoning behind the direct HTTP
+approach during a follow-up discussion.
+
+Before submitting, update this section if necessary so that it accurately
+reflects the actual AI usage and manual changes made by the candidate.
